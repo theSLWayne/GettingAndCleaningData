@@ -1,0 +1,102 @@
+library(data.table)
+library(dplyr)
+
+# Getting subjects
+trainSubs <- fread('./data/UCI HAR Dataset/train/subject_train.txt')
+testSubs <- fread('./data/UCI HAR Dataset/test/subject_test.txt')
+# Concatenating them togehter
+dataSubs <- rbind(trainSubs, testSubs)
+dim(dataSubs)
+names(dataSubs) <- "Subjects"
+
+# Getting activities
+
+
+# Getting data for other features
+trainData <- fread('./data/UCI HAR Dataset/train/X_train.txt')
+testData <- fread('./data/UCI HAR Dataset/test/X_test.txt')
+# Concatenating them together
+dTable <- rbind(trainData, testData)
+dim(dTable)
+
+dTable <- cbind(dataSubs, dataActs, dTable)
+dTable <- data.table(dTable)
+setkey(dTable, Subjects, Activities)
+
+# Get feature names
+dataFeatures <- fread('./data/UCI HAR Dataset/features.txt')
+names(dataFeatures) <- c('featureNumber', 'featureName')
+
+# Getting relevant feature names, i.e. the names that contain 'mean' and 'std'
+dataFeatures <- dataFeatures[grep("mean\\(\\)|std\\(\\)", featureName)]
+
+# Creating a column for variable keys to match the variable names in dTable.
+dataFeatures$featureKey <- dataFeatures[, paste0("V", featureNumber)]
+
+# Subset the original dataset with only these features.
+dTable <- dTable[, c("Subjects", "Activities", dataFeatures$featureKey), with = F]
+dim(dTable)
+
+# Get activity labels
+activityLabels <- fread('./data/UCI HAR Dataset/activity_labels.txt')
+names(activityLabels) <- c('activityNumber', 'activityName')
+
+# Merge two datasets.
+dTable <- merge(dTable, activityLabels, by.x = 'Activities', by.y = 'activityNumber',
+                all.x = T)
+# Updating keys.
+setkey(dTable, Subjects, Activities, activityName)
+head(dTable)
+
+# Melting the data table to reshape it to tall and narrow format.
+dTable <- data.table(melt(dTable, key(dTable), variable.name = 'featureKey'))
+head(dTable)
+
+# Merge Activity Names.
+dTable <- merge(dTable, dataFeatures, by = 'featureKey', all.x = T)
+head(dTable)
+
+# Create two variables, Activity and feature as factors.
+dTable$Activity <- as.factor(dTable$activityName)
+dTable$featureName <- as.factor(dTable$featureName)
+head(dTable)
+
+# Separating features from relevant feature names
+# Time or Frequency
+testDTable <- dTable
+timeRows <- grep("^t", dTable$featureName)
+freqRows <- grep("^f", dTable$featureName)
+testDTable$domain[timeRows] <- "Time"
+testDTable$domain[freqRows] <- "Frequency"
+
+# Instrument (Accelerometer or Gyroscope)
+accRows <- grep("Acc", dTable$featureName)
+gyroRows <- grep("Gyro", dTable$featureName)
+testDTable$Instrument[accRows] <- "Accelerometer"
+testDTable$Instrument[gyroRows] <- "Gyroscope"
+
+# Acceleration (Body or Gravity)
+bodyRows <- grep("BodyAcc", dTable$featureName)
+gravRows <- grep("GravityAcc", dTable$featureName)
+testDTable$Acceleration[bodyRows] <- "Body"
+testDTable$Acceleration[gravRows] <- "Gravity"
+
+head(testDTable)
+
+mnRows <- grep("mean", dTable$featureName)
+stdRows <- grep("std", dTable$featureName)
+dTable$Variable[mnRows] <- "Mean"
+dim(dTable)
+length(meanRows)
+meanRows
+dTable$Variable[stdRows] <- "SD"
+
+length(magnitudeRows)
+dTable$Mag[magnitudeRows] <- "Magnitude"
+dTableCopy <- dTable
+dTableCopy$Magnitude[magnitudeRows] <- "Magnitude"
+dTableCopy$Magnitude <- 0
+
+rm(dTableCopy)
+names(dTable)
+head(dTable$Activities)

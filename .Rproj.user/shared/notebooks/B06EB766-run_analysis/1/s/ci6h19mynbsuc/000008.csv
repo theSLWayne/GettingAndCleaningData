@@ -1,0 +1,3 @@
+"0","activityLabels <- fread('./data/UCI HAR Dataset/activity_labels.txt')"
+"0","names(activityLabels) <- c('activityNumber', 'activityName')"
+"0","head(activityLabels)"

@@ -1,0 +1,2 @@
+"0","dTable <- data.table(melt(dTable, key(dTable), variable.name = 'featureKey'))"
+"0","head(dTable)"

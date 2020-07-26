@@ -1,0 +1,27 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1595786795433.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "61444C2",
+    "lastKnownWriteTime" : 1595792886,
+    "last_content_update" : 1595792886333,
+    "path" : "/media/batman/New Volume1/Machine Learning/Courses/Getting and Cleaning Data/Assignment/run_analysis.Rmd",
+    "project_path" : "run_analysis.Rmd",
+    "properties" : {
+        "cursorPosition" : "266,0",
+        "last_setup_crc32" : "7C62CF52bb338d19",
+        "scrollLine" : "259",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

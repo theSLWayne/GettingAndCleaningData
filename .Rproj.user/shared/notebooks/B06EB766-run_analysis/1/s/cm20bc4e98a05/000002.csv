@@ -1,0 +1,8 @@
+"0","dTable <- merge(dTable, activityLabels, by.x = 'Activities', by.y = 'activityNumber',"
+"0","                all.x = T)"
+"0","dim(dTable)"
+"1","[1]"
+"1"," 10299"
+"1","    69"
+"1","
+"

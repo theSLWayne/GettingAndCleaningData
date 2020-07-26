@@ -1,0 +1,3 @@
+"0","dTable <- dTable[, list(Count = .N, Average = mean(value)), by=key(dTable)]"
+"0","dTableTidy <- dTable[, c(key(dTable), 'Count', 'Average'), with = F]"
+"0","head(dTableTidy)"

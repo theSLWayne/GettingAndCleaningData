@@ -1,0 +1,7 @@
+"0","dataFeatures <- dataFeatures[grep(""mean\\(\\)|std\\(\\)"", featureName)]"
+"0","dim(dataFeatures)"
+"1","[1]"
+"1"," 66"
+"1","  2"
+"1","
+"

@@ -1,0 +1,266 @@
+---
+title: "run_analysis"
+author: "Hiran Hasanka"
+date: "7/26/2020"
+output: pdf_document
+---
+
+> The purpose of this project is to demonstrate your ability to collect, work with, and clean a data set. The goal is to prepare tidy data that can be used for later analysis. You will be graded by your peers on a series of yes/no questions related to the project. You will be required to submit: 1) a tidy data set as described below, 2) a link to a Github repository with your script for performing the analysis, and 3) a code book that describes the variables, the data, and any transformations or work that you performed to clean up the data called CodeBook.md. You should also include a README.md in the repo with your scripts. This repo explains how all of the scripts work and how they are connected.  
+> 
+> One of the most exciting areas in all of data science right now is wearable computing - see for example this article . Companies like Fitbit, Nike, and Jawbone Up are racing to develop the most advanced algorithms to attract new users. The data linked to from the course website represent data collected from the accelerometers from the Samsung Galaxy S smartphone. A full description is available at the site where the data was obtained: 
+> 
+> http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones 
+> 
+> Here are the data for the project: 
+> 
+> https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip 
+> 
+> You should create one R script called run_analysis.R that does the following. 
+> 
+> 1. **DONE** Merges the training and the test sets to create one data set.
+> 2. **DONE** Extracts only the measurements on the mean and standard deviation for each measurement.
+> 3. **DONE** Uses descriptive activity names to name the activities in the data set.
+> 4. **DONE** Appropriately labels the data set with descriptive activity names.
+> 5. **DONE** Creates a second, independent tidy data set with the average of each variable for each activity and each subject. 
+> 
+> Good luck!
+
+## Loading Packages
+```{r}
+library(data.table)
+library(dplyr)
+```
+
+## Downloading and Unzipping Data
+The dataset will be downloaded to the 'data' folder.
+The dataset is already downloaded and unzipped.
+**Do NOT evaluate the following chunk of code.**
+The data files have been placed in a folder named 'UCI HAR Dataset'.
+
+```{r, eval=FALSE}
+if (!file.exists('./data')) {
+  dir.create('./data')
+}
+
+download.file('https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip', destfile = './data/Dataset.zip')
+```
+
+
+## Reading Data
+**Refer 'README.txt' file in the folder 'UCI HAR Dataset' for details.**
+
+### 1. Reading Subjects
+
+```{r}
+trainSubs <- fread('./data/UCI HAR Dataset/train/subject_train.txt')
+testSubs <- fread('./data/UCI HAR Dataset/test/subject_test.txt')
+# Concatenating them togehter
+dataSubs <- rbind(trainSubs, testSubs)
+names(dataSubs) <- "Subjects"
+dim(dataSubs)
+```
+
+### 2. Reading Activities
+
+```{r}
+trainActs <- fread('./data/UCI HAR Dataset/train/y_train.txt')
+testActs <- fread('./data/UCI HAR Dataset/test/y_test.txt')
+# Concatenating them together
+dataActs <- rbind(trainActs, testActs)
+names(dataActs) <- "Activities"
+dim(dataActs)
+```
+
+### 3. Reading Data for other Features
+
+```{r}
+trainData <- fread('./data/UCI HAR Dataset/train/X_train.txt')
+testData <- fread('./data/UCI HAR Dataset/test/X_test.txt')
+# Concatenating them together
+dTable <- rbind(trainData, testData)
+dim(dTable)
+```
+
+### 4. Merging Columns Together
+Seeting the key of the data table for "Subjects" and "Activities".
+
+```{r}
+dTable <- cbind(dataSubs, dataActs, dTable)
+dTable <- data.table(dTable)
+setkey(dTable, Subjects, Activities)
+dim(dTable)
+```
+
+### 5. Reading Feature Names
+
+```{r}
+dataFeatures <- fread('./data/UCI HAR Dataset/features.txt')
+names(dataFeatures) <- c('featureNumber', 'featureName')
+head(dataFeatures)
+```
+
+## Subsetting and Processing
+
+Subsetting Mean and Standard Deviation from the feature name list.
+
+```{r}
+dataFeatures <- dataFeatures[grep("mean\\(\\)|std\\(\\)", featureName)]
+dim(dataFeatures)
+```
+
+Creating a column for variable keys to match the variable names in dTable.
+
+```{r}
+dataFeatures$featureKey <- dataFeatures[, paste0("V", featureNumber)]
+head(dataFeatures)
+```
+
+Subsetting the original dataset with only these features.
+
+```{r}
+dTable <- dTable[, c("Subjects", "Activities", dataFeatures$featureKey), with = F]
+dim(dTable)
+```
+
+Reading activity tables
+
+```{r}
+activityLabels <- fread('./data/UCI HAR Dataset/activity_labels.txt')
+names(activityLabels) <- c('activityNumber', 'activityName')
+head(activityLabels)
+```
+
+Merge datasets 'dTable' and 'activityTables' to get labels for activities.
+
+```{r}
+dTable <- merge(dTable, activityLabels, by.x = 'Activities', by.y = 'activityNumber',
+                all.x = T)
+dim(dTable)
+```
+
+Updating keys
+
+```{r}
+setkey(dTable, Subjects, Activities, activityName)
+```
+
+Melting the data table to reshape it to tall and narrow format.
+
+```{r}
+dTable <- data.table(melt(dTable, key(dTable), variable.name = 'featureKey'))
+head(dTable)
+```
+
+Merge Feature Names.
+
+```{r}
+dTable <- merge(dTable, dataFeatures, by = 'featureKey', all.x = T)
+head(dTable)
+```
+
+Create two variables, 'Activity' and 'featureName' as factors.
+
+```{r}
+dTable$Activity <- as.factor(dTable$activityName)
+dTable$featureName <- as.factor(dTable$featureName)
+head(dTable)
+```
+
+## Making Data Tidy
+
+The current data table is not exactly tidy. One record of 'featureName' contains many information in it. I've identified them as follows:
+    1. Domain (Time or Frequency)
+    2. Instrument (Accelerometer or Gyroscope)
+    3. Acceleration (Body or Gravity)
+    4. Variable (Mean or Standard Deviation)
+    5. Jerk (Jerk or not)
+    6. Magnitude (Magnitude or not)
+    7. Axis (X, Y or Z)
+    
+**Please refer to the README file provided with the dataset for more details about the information given with feature names.**
+I'll try to make these information types as separate features in the data table.
+
+### 1. Domain
+
+```{r}
+timeRows <- grep("^t", dTable$featureName)
+freqRows <- grep("^f", dTable$featureName)
+dTable$Domain[timeRows] <- "Time"
+dTable$Domain[freqRows] <- "Frequency"
+head(dTable$Domain)
+```
+
+### 2. Instrument
+
+```{r}
+accRows <- grep("Acc", dTable$featureName)
+gyroRows <- grep("Gyro", dTable$featureName)
+dTable$Instrument[accRows] <- "Accelerometer"
+dTable$Instrument[gyroRows] <- "Gyroscope"
+head(dTable$Instrument)
+```
+
+### 3. Acceleration
+
+```{r}
+bodyRows <- grep("BodyAcc", dTable$featureName)
+gravRows <- grep("GravityAcc", dTable$featureName)
+dTable$Acceleration[bodyRows] <- "Body"
+dTable$Acceleration[gravRows] <- "Gravity"
+head(dTable$Acceleration)
+```
+
+### 4. Variable
+
+```{r}
+mnRows <- grep("mean", dTable$featureName)
+stdRows <- grep("std", dTable$featureName)
+dTable$Variable <- NA
+dTable$Variable[mnRows] <- "Mean"
+dTable$Variable[stdRows] <- "SD"
+head(dTable$Variable)
+```
+
+### 5. Jerk
+
+```{r}
+jerkRows <- grep("Jerk", dTable$featureName)
+dTable$Jerk[jerkRows] <- "Jerk"
+head(dTable$Jerk)
+```
+
+### 6. Magnitude
+
+```{r}
+magnitudeRows <- grep("Mag", dTable$featureName)
+dTable$Magnitude <- NA
+dTable$Magnitude[magnitudeRows] <- "Magnitude"
+head(dTable$Magnitude)
+```
+
+### 7. Axis
+
+```{r}
+xRows <- grep("-X", dTable$featureName)
+yRows <- grep("-Y", dTable$featureName)
+zRows <- grep("-Z", dTable$featureName)
+dTable$Axis <- NA
+dTable$Axis[xRows] <- "X"
+dTable$Axis[yRows] <- "Y"
+dTable$Axis[zRows] <- "Z"
+head(dTable$Axis)
+```
+
+Creating a dataset with the mean of each variable for each activity and each subject.
+
+```{r}
+setkey(dTable, 'Subjects', 'Activity', 'Domain', 'Instrument', 'Acceleration', 'Variable', 'Jerk', 'Magnitude', 'Axis')
+```
+
+
+```{r}
+dTable <- dTable[, list(Count = .N, Average = mean(value)), by=key(dTable)]
+dTableTidy <- dTable[, c(key(dTable), 'Count', 'Average'), with = F]
+head(dTableTidy)
+```
+

@@ -1,0 +1,3 @@
+"0","dTable$Activity <- as.factor(dTable$activityName)"
+"0","dTable$featureName <- as.factor(dTable$featureName)"
+"0","head(dTable)"

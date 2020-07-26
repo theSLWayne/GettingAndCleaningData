@@ -1,0 +1,3 @@
+"0","dataFeatures <- fread('./data/UCI HAR Dataset/features.txt')"
+"0","names(dataFeatures) <- c('featureNumber', 'featureName')"
+"0","head(dataFeatures)"
