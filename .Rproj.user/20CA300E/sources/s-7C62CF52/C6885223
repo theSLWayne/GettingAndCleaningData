@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1595794133281.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3564664255",
+    "id" : "C6885223",
+    "lastKnownWriteTime" : 1595794568,
+    "last_content_update" : 1595794568620,
+    "path" : "/media/batman/New Volume1/Machine Learning/Courses/Getting and Cleaning Data/Assignment/codebook.Rmd",
+    "project_path" : "codebook.Rmd",
+    "properties" : {
+        "cursorPosition" : "46,18",
+        "scrollLine" : "36",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

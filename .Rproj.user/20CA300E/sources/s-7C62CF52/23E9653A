@@ -5,14 +5,14 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "3107850455",
+    "hash" : "2433141623",
     "id" : "23E9653A",
-    "lastKnownWriteTime" : 1595793410,
-    "last_content_update" : 1595793410489,
+    "lastKnownWriteTime" : 1595794651,
+    "last_content_update" : 1595794651607,
     "path" : "/media/batman/New Volume1/Machine Learning/Courses/Getting and Cleaning Data/Assignment/run_analysis.R",
     "project_path" : "run_analysis.R",
     "properties" : {
-        "cursorPosition" : "9,0",
+        "cursorPosition" : "12,46",
         "scrollLine" : "0",
         "tempName" : "Untitled1"
     },
