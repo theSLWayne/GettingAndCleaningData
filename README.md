@@ -26,5 +26,6 @@
 
 - Open the R script `run_analysis.R`.
 - It will have scripts to convert `run_analysis.Rmd` file to `run_analysis.md` and `run_analysis.html` files.
-- `run_analysis.Rmd` file will describe every step I followed to make the dataset tidy. You can use wither `run_analysis.md` or `run_analysis.html` as per your preference.
+- `run_analysis.Rmd` file will describe every step I followed to make the dataset tidy. You can use either `run_analysis.md` or `run_analysis.html` as per your preference.
 - `run_analysis.R` file will also write the tidy data table into a .txt files named `TidyData.txt`.
+- `run_analysis.R` file contains scripts to convert `codebook.Rmd` file to `codebook.md` and `codebook.html` files. You can use either files per your convenience.
